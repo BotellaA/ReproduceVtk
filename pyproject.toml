@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "test_repo"
+version = "0.0.0"
+dynamic = ["dependencies"]
+authors = [
+  { name="Julien Champagnol", email="julien.champagnol@geode-solutions.com" },
+]
+description = "Reproduction repo"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.optional-dependencies]
+gpu = ["vtk == 9.3.1"]
+
+[project.scripts]
+test_repo = "test_repo.vtkw_server:run_server"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
