@@ -3,7 +3,8 @@ from pathlib import Path
 from websocket import create_connection
 import json
 from xprocess import ProcessStarter
-import vtk
+from vtkmodules.vtkIOImage import vtkPNGReader, vtkJPEGReader
+from vtkmodules.vtkImagingCore import vtkImageDifference
 import os
 from test_repo import config
 
@@ -65,18 +66,18 @@ class ServerMonitor:
 
     def images_diff(self, first_image_path, second_image_path):
         if ".png" in first_image_path:
-            first_reader = vtk.vtkPNGReader()
+            first_reader = vtkPNGReader()
         elif (".jpg" in first_image_path) or (".jpeg" in first_image_path):
-            first_reader = vtk.vtkJPEGReader()
+            first_reader = vtkJPEGReader()
         first_reader.SetFileName(first_image_path)
 
         if ".png" in second_image_path:
-            second_reader = vtk.vtkPNGReader()
+            second_reader = vtkPNGReader()
         elif (".jpg" in second_image_path) or (".jpeg" in second_image_path):
-            second_reader = vtk.vtkJPEGReader()
+            second_reader = vtkJPEGReader()
         second_reader.SetFileName(second_image_path)
 
-        images_diff = vtk.vtkImageDifference()
+        images_diff = vtkImageDifference()
         images_diff.SetInputConnection(first_reader.GetOutputPort())
         images_diff.SetImageConnection(second_reader.GetOutputPort())
         images_diff.Update()
@@ -88,13 +89,6 @@ class ServerMonitor:
         for message in range(nb_messages):
             print(f"{message=}", flush=True)
             image = self.ws.recv()
-            if isinstance(image, bytes):
-                test_file_path = os.path.abspath(
-                    os.path.join(self.test_output_dir, "test.jpeg")
-                )
-                with open(test_file_path, "wb") as f:
-                    f.write(image)
-                    f.close()
         if isinstance(image, bytes):
             print(f"{image=}", flush=True)
             response = self.ws.recv()
@@ -103,12 +97,13 @@ class ServerMonitor:
             test_file_path = os.path.abspath(
                 os.path.join(self.test_output_dir, f"test.{format}")
             )
+            print("test file", test_file_path, flush=True)
+            os.makedirs(self.test_output_dir, exist_ok=True)
             with open(test_file_path, "wb") as f:
                 f.write(image)
                 f.close()
 
             path_image = os.path.join(self.images_dir_path, filename)
-
             return self.images_diff(test_file_path, path_image)==0.0
 
 

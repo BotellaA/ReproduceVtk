@@ -4,9 +4,9 @@ import os
 import sys
 
 # Third party imports
-import vtk
-from vtk.web import wslink as vtk_wslink
-from vtk.web import protocols as vtk_protocols
+from vtkmodules.web import wslink as vtk_wslink
+from vtkmodules.web import protocols as vtk_protocols
+from vtkmodules.vtkRenderingCore import vtkRenderWindow, vtkRenderer, vtkRenderWindowInteractor
 from wslink import server
 
 # Local application imports
@@ -56,26 +56,16 @@ class _Server(vtk_wslink.ServerProtocol):
         self.updateSecret(_Server.authKey)
 
         if not _Server.view:
-            renderer = vtk.vtkRenderer()
-            renderWindow = vtk.vtkRenderWindow()
+            renderer = vtkRenderer()
+            renderWindow = vtkRenderWindow()
             renderWindow.AddRenderer(renderer)
             self.setSharedObject("renderer", renderer)
 
-            renderWindowInteractor = vtk.vtkRenderWindowInteractor()
+            renderWindowInteractor = vtkRenderWindowInteractor()
             renderWindowInteractor.SetRenderWindow(renderWindow)
-            renderWindowInteractor.GetInteractorStyle().SetCurrentStyleToTrackballCamera()
             renderWindowInteractor.EnableRenderOff()
             self.getApplication().GetObjectIdMap().SetActiveObject("VIEW", renderWindow)
 
-            widget = vtk.vtkOrientationMarkerWidget()
-            widget.SetInteractor(renderWindowInteractor)
-            widget.SetViewport(0.0, 0.0, 0.2, 0.2)
-            axes = vtk.vtkAxesActor()
-            widget.SetOrientationMarker(axes)
-            widget.EnabledOn()
-            widget.InteractiveOff()
-            renderWindow.SetOffScreenRendering(not _Server.debug)
-            self.setSharedObject("marker", widget)
 
 
 # =============================================================================
